@@ -29,6 +29,9 @@ error_chain! {
         UnknownCacheFileVersion(version: u32) {
             description("unknown cache file version")
             display("unknown cache file version '{}'", version)
+        BreakpadError(message: String) {
+            description("breakpad error")
+            display("breakpad error: {}", &message)
         }
     }
 
