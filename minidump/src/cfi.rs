@@ -18,10 +18,10 @@ impl<W: Write> BreakpadAsciiCfiWriter<W> {
         BreakpadAsciiCfiWriter { inner }
     }
 
-    pub fn process(&mut self, data: &[u8]) -> Result<()> {
-        match ObjectFile::parse(data)? {
-            ObjectFile::Elf(ref elf) => self.process_dwarf(elf),
-            ObjectFile::MachO(ref macho) => self.process_dwarf(macho),
+    pub fn process(&mut self, file: &ObjectFile) -> Result<()> {
+        match file {
+            &ObjectFile::Elf(ref elf) => self.process_dwarf(elf),
+            &ObjectFile::MachO(ref macho) => self.process_dwarf(macho),
             _ => return Err("".into()),
         }
     }
@@ -192,5 +192,6 @@ impl<W: Write> BreakpadAsciiCfiWriter<W> {
 
 pub fn extract_cfi<W: Write>(debug_symbols: &[u8], output: &mut W) -> Result<()> {
     // TODO(ja): Document that we need to pass in the main MachO binary to extract CFI
-    BreakpadAsciiCfiWriter::new(output).process(debug_symbols)
+    let file = ObjectFile::parse(debug_symbols)?;
+    BreakpadAsciiCfiWriter::new(output).process(&file)
 }

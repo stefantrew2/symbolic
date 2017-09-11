@@ -29,6 +29,7 @@ error_chain! {
         UnknownCacheFileVersion(version: u32) {
             description("unknown cache file version")
             display("unknown cache file version '{}'", version)
+        }
         BreakpadError(message: String) {
             description("breakpad error")
             display("breakpad error: {}", &message)
@@ -57,19 +58,13 @@ impl From<scroll::Error> for Error {
     fn from(err: scroll::Error) -> Error {
         use scroll::Error::*;
         match err {
-            TooBig { .. } => {
-                io::Error::new(io::ErrorKind::UnexpectedEof,
-                    "Tried to read type that was too large").into()
-            },
-            BadOffset(..) => {
-                io::Error::new(io::ErrorKind::InvalidData, "Bad offset").into()
-            },
-            BadInput { .. } => {
-                io::Error::new(io::ErrorKind::InvalidData, "Bad input").into()
-            }
-            Custom(s) => {
-                io::Error::new(io::ErrorKind::Other, s).into()
-            }
+            TooBig { .. } => io::Error::new(
+                io::ErrorKind::UnexpectedEof,
+                "Tried to read type that was too large",
+            ).into(),
+            BadOffset(..) => io::Error::new(io::ErrorKind::InvalidData, "Bad offset").into(),
+            BadInput { .. } => io::Error::new(io::ErrorKind::InvalidData, "Bad input").into(),
+            Custom(s) => io::Error::new(io::ErrorKind::Other, s).into(),
             IO(err) => Error::from(err),
         }
     }
